@@ -5,7 +5,7 @@ import (
 
 	"github.com/dailyburn/ratchet/data"
 	"github.com/dailyburn/ratchet/logger"
-	"github.com/michaellindon/ratchet/util"
+	"github.com/Tesla-SCA/ratchet/util"
 )
 
 // PostgreSQLWriter handles INSERTing data.JSON into a
