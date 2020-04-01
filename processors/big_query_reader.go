@@ -3,10 +3,11 @@ package processors
 import (
 	"errors"
 
-	bigquery "github.com/Tesla-SCA/bigquery/client"
 	"github.com/Tesla-SCA/ratchet/data"
 	"github.com/Tesla-SCA/ratchet/logger"
 	"github.com/Tesla-SCA/ratchet/util"
+
+	bigquery "github.com/dailyburn/bigquery/client"
 )
 
 // BigQueryReader is used to query data from Google's BigQuery,

@@ -1,10 +1,11 @@
 package processors
 
 import (
-	bigquery "github.com/Tesla-SCA/bigquery/client"
 	"github.com/Tesla-SCA/ratchet/data"
 	"github.com/Tesla-SCA/ratchet/logger"
 	"github.com/Tesla-SCA/ratchet/util"
+
+	bigquery "github.com/dailyburn/bigquery/client"
 )
 
 // BigQueryWriter is used to write data to Google's BigQuery. If the table you want to
