@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/dailyburn/ratchet/data"
+	"github.com/Tesla-SCA/ratchet/data"
 )
 
 // DataProcessor is the interface that should be implemented to perform data-related

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dailyburn/ratchet/data"
-	"github.com/dailyburn/ratchet/logger"
+	"github.com/Tesla-SCA/ratchet/data"
+	"github.com/Tesla-SCA/ratchet/logger"
 )
 
 // MySQLInsertData abstracts building and executing a SQL INSERT

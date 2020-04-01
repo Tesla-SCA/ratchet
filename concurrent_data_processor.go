@@ -4,8 +4,8 @@ import (
 	"container/list"
 	"sync"
 
-	"github.com/dailyburn/ratchet/data"
-	"github.com/dailyburn/ratchet/logger"
+	"github.com/Tesla-SCA/ratchet/data"
+	"github.com/Tesla-SCA/ratchet/logger"
 )
 
 // ConcurrentDataProcessor is a DataProcessor that also defines
