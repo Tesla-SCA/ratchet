@@ -3,7 +3,7 @@ package processors
 import (
 	"database/sql"
 
-	"github.com/dailyburn/ratchet/data"
+	"github.com/Tesla-SCA/ratchet/data"
 )
 
 // SQLReaderMySQLWriter performs both the job of a SQLReader and MySQLWriter.

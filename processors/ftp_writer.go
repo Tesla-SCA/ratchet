@@ -3,9 +3,9 @@ package processors
 import (
 	"io"
 
-	"github.com/dailyburn/ratchet/data"
-	"github.com/dailyburn/ratchet/logger"
-	"github.com/dailyburn/ratchet/util"
+	"github.com/Tesla-SCA/ratchet/data"
+	"github.com/Tesla-SCA/ratchet/logger"
+	"github.com/Tesla-SCA/ratchet/util"
 	"github.com/jlaffaye/ftp"
 )
 

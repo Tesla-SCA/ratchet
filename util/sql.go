@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/dailyburn/ratchet/data"
+	"github.com/Tesla-SCA/ratchet/data"
 	"github.com/kisielk/sqlstruct"
 )
 
