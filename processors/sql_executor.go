@@ -3,6 +3,7 @@ package processors
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/dailyburn/ratchet/data"
 	"github.com/dailyburn/ratchet/logger"
@@ -44,6 +45,7 @@ func (s *SQLExecutor) ProcessData(d data.JSON, outputChan chan data.JSON, killCh
 	}()
 
 	sql := ""
+	fmt.Printf("hi!")
 	var err error
 	if s.query == "" && s.sqlGenerator != nil {
 		sql, err = s.sqlGenerator(d)
