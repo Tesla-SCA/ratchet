@@ -14,13 +14,15 @@ import (
 // It can operate in 1 mode:
 // 1) Static - runs the given SQL query and ignores any received data.
 type SQLPassthroughExecutor struct {
-	readDB       *sql.DB
-	query        string
+	readDB       	*sql.DB
+	query        	string
+	timesMaxRun  	int
+	timesRun	 	int
 }
 
 // NewSQLPassthroughExecutor returns a new SQLPassthroughExecutor
-func NewSQLPassthroughExecutor(dbConn *sql.DB, sql string) *SQLPassthroughExecutor {
-	return &SQLPassthroughExecutor{readDB: dbConn, query: sql}
+func NewSQLPassthroughExecutor(dbConn *sql.DB, sql string, timesMaxRun int) *SQLPassthroughExecutor {
+	return &SQLPassthroughExecutor{readDB: dbConn, query: sql, timesMaxRun: timesMaxRun, timesRun: 0}
 }
 
 // ProcessData runs the SQL statements, deferring to util.ExecuteSQLQuery
@@ -31,6 +33,12 @@ func (s *SQLPassthroughExecutor) ProcessData(d data.JSON, outputChan chan data.J
 			util.KillPipelineIfErr(err.(error), killChan)
 		}
 	}()
+
+	if s.timesRun >= s.timesMaxRun {
+		outputChan <- d
+		return
+	}
+	s.timesRun += 1
 
 	sql := ""
 	var err error
