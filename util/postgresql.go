@@ -44,10 +44,9 @@ func PostgreSQLInsertData(db *sql.DB, d data.JSON, tableName string, onDupKeyUpd
 
 func postgresInsertObjects(db *sql.DB, objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string) error {
 	logger.Info("PostgreSQLInsertData: building INSERT for len(objects) =", len(objects))
-	insertSQL, vals := buildPostgreSQLInsertSQL(objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
+	insertSQL := buildPostgreSQLInsertSQL(objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
 
 	logger.Info("PostgreSQLInsertData:", insertSQL)
-	logger.Info("PostgreSQLInsertData: values", vals)
 
 	res, err := db.Exec(insertSQL)
 	if err != nil {
@@ -63,7 +62,7 @@ func postgresInsertObjects(db *sql.DB, objects []map[string]interface{}, tableNa
 	return nil
 }
 
-func buildPostgreSQLInsertSQL(objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string) (insertSQL string, vals []interface{}) {
+func buildPostgreSQLInsertSQL(objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string) (insertSQL string) {
 	cols := sortedColumns(objects)
 
 	// Format: INSERT INTO tablename(col1,col2) VALUES(?,?),(?,?)
@@ -81,40 +80,12 @@ func buildPostgreSQLInsertSQL(objects []map[string]interface{}, tableName string
 				row += ","
 			}
 
-			placeholder := fmt.Sprintf("$%v", i*len(cols)+j+1)
-			row += placeholder
+			value := fmt.Sprintf("%v", objects[i][cols[j]])
+			row += value
 		}
 
 		row += ")"
 		insertSQL += row
-	}
-
-	if onDupKeyUpdate {
-		// format: ON CONFLICT (index) DO UPDATE SET a=EXCLUDED.a, b=EXCLUDED.b
-		insertSQL += fmt.Sprintf(" ON CONFLICT (%v) DO UPDATE SET ", onDupKeyIndex)
-
-		// If this wasn't explicitly set, we want to update all columns
-		if len(onDupKeyFields) == 0 {
-			onDupKeyFields = cols
-		}
-
-		for i, c := range onDupKeyFields {
-			if i > 0 {
-				insertSQL += ","
-			}
-			insertSQL += fmt.Sprintf("%v=EXCLUDED.%v", c, c)
-		}
-	}
-
-	vals = []interface{}{}
-	for _, obj := range objects {
-		for _, col := range cols {
-			if val, ok := obj[col]; ok {
-				vals = append(vals, val)
-			} else {
-				vals = append(vals, nil)
-			}
-		}
 	}
 
 	return
