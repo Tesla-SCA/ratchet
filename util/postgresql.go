@@ -46,7 +46,8 @@ func postgresInsertObjects(db *sql.DB, objects []map[string]interface{}, tableNa
 	logger.Info("PostgreSQLInsertData: building INSERT for len(objects) =", len(objects))
 	insertSQL, vals := buildPostgreSQLInsertSQL(objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
 
-	logger.Info("PostgreSQLInsertData:", insertSQL)
+	logger.Debug("PostgreSQLInsertData:", insertSQL)
+	logger.Debug("PostgreSQLInsertData: values", vals)
 
 	res, err := db.Exec(insertSQL, vals...)
 	if err != nil {
@@ -61,44 +62,6 @@ func postgresInsertObjects(db *sql.DB, objects []map[string]interface{}, tableNa
 	logger.Info(fmt.Sprintf("PostgreSQLInsertData: rows affected = %d", rowCnt))
 	return nil
 }
-
-//func buildPostgreSQLInsertSQL(objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string) (insertSQL string) {
-//	cols := sortedColumns(objects)
-//
-//	// Format: INSERT INTO tablename(col1,col2) VALUES(?,?),(?,?)
-//	insertSQL = fmt.Sprintf("INSERT INTO %v(%v) VALUES", tableName, strings.Join(cols, ","))
-//
-//	for i := 0; i < len(objects); i++ {
-//		row := "("
-//
-//		if i > 0 {
-//			insertSQL += ", "
-//		}
-//
-//		objectVals := objects[i]
-//
-//		for j := 0; j < len(cols); j++ {
-//			if j > 0 {
-//				row += ","
-//			}
-//
-//			var toInsert string
-//			value, ok := objectVals[cols[j]]
-//			if ok {
-//				toInsert = fmt.Sprintf("%v", value)
-//			} else {
-//				toInsert = "NULL"
-//			}
-//
-//			row += toInsert
-//		}
-//
-//		row += ")"
-//		insertSQL += row
-//	}
-//
-//	return
-//}
 
 func buildPostgreSQLInsertSQL(objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string) (insertSQL string, vals []interface{}) {
 	cols := sortedColumns(objects)
