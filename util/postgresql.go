@@ -44,11 +44,11 @@ func PostgreSQLInsertData(db *sql.DB, d data.JSON, tableName string, onDupKeyUpd
 
 func postgresInsertObjects(db *sql.DB, objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string) error {
 	logger.Info("PostgreSQLInsertData: building INSERT for len(objects) =", len(objects))
-	insertSQL := buildPostgreSQLInsertSQL(objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
+	insertSQL, vals := buildPostgreSQLInsertSQL(objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
 
 	logger.Info("PostgreSQLInsertData:", insertSQL)
 
-	res, err := db.Exec(insertSQL)
+	res, err := db.Exec(insertSQL, vals...)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,45 @@ func postgresInsertObjects(db *sql.DB, objects []map[string]interface{}, tableNa
 	return nil
 }
 
-func buildPostgreSQLInsertSQL(objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string) (insertSQL string) {
+//func buildPostgreSQLInsertSQL(objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string) (insertSQL string) {
+//	cols := sortedColumns(objects)
+//
+//	// Format: INSERT INTO tablename(col1,col2) VALUES(?,?),(?,?)
+//	insertSQL = fmt.Sprintf("INSERT INTO %v(%v) VALUES", tableName, strings.Join(cols, ","))
+//
+//	for i := 0; i < len(objects); i++ {
+//		row := "("
+//
+//		if i > 0 {
+//			insertSQL += ", "
+//		}
+//
+//		objectVals := objects[i]
+//
+//		for j := 0; j < len(cols); j++ {
+//			if j > 0 {
+//				row += ","
+//			}
+//
+//			var toInsert string
+//			value, ok := objectVals[cols[j]]
+//			if ok {
+//				toInsert = fmt.Sprintf("%v", value)
+//			} else {
+//				toInsert = "NULL"
+//			}
+//
+//			row += toInsert
+//		}
+//
+//		row += ")"
+//		insertSQL += row
+//	}
+//
+//	return
+//}
+
+func buildPostgreSQLInsertSQL(objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string) (insertSQL string, vals []interface{}) {
 	cols := sortedColumns(objects)
 
 	// Format: INSERT INTO tablename(col1,col2) VALUES(?,?),(?,?)
@@ -75,26 +113,45 @@ func buildPostgreSQLInsertSQL(objects []map[string]interface{}, tableName string
 			insertSQL += ", "
 		}
 
-		objectVals := objects[i]
-
 		for j := 0; j < len(cols); j++ {
 			if j > 0 {
 				row += ","
 			}
 
-			var toInsert string
-			value, ok := objectVals[cols[j]]
-			if ok {
-				toInsert = fmt.Sprintf("%v", value)
-			} else {
-				toInsert = "NULL"
-			}
-
-			row += toInsert
+			placeholder := fmt.Sprintf("$%v", i*len(cols)+j+1)
+			row += placeholder
 		}
 
 		row += ")"
 		insertSQL += row
+	}
+
+	if onDupKeyUpdate {
+		// format: ON CONFLICT (index) DO UPDATE SET a=EXCLUDED.a, b=EXCLUDED.b
+		insertSQL += fmt.Sprintf(" ON CONFLICT (%v) DO UPDATE SET ", onDupKeyIndex)
+
+		// If this wasn't explicitly set, we want to update all columns
+		if len(onDupKeyFields) == 0 {
+			onDupKeyFields = cols
+		}
+
+		for i, c := range onDupKeyFields {
+			if i > 0 {
+				insertSQL += ","
+			}
+			insertSQL += fmt.Sprintf("%v=EXCLUDED.%v", c, c)
+		}
+	}
+
+	vals = []interface{}{}
+	for _, obj := range objects {
+		for _, col := range cols {
+			if val, ok := obj[col]; ok {
+				vals = append(vals, val)
+			} else {
+				vals = append(vals, nil)
+			}
+		}
 	}
 
 	return
