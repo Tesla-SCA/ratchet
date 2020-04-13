@@ -46,8 +46,8 @@ func postgresInsertObjects(db *sql.DB, objects []map[string]interface{}, tableNa
 	logger.Info("PostgreSQLInsertData: building INSERT for len(objects) =", len(objects))
 	insertSQL, vals := buildPostgreSQLInsertSQL(objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
 
-	logger.Debug("PostgreSQLInsertData:", insertSQL)
-	logger.Debug("PostgreSQLInsertData: values", vals)
+	logger.Info("PostgreSQLInsertData:", insertSQL)
+	logger.Info("PostgreSQLInsertData: values", vals)
 
 	res, err := db.Exec(insertSQL)
 	if err != nil {

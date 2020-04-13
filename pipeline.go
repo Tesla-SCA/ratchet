@@ -53,7 +53,7 @@ func NewPipeline(processors ...DataProcessor) *Pipeline {
 // between stages each containing variable number of DataProcessors.
 // See the ratchet package documentation for code examples and diagrams.
 func NewBranchingPipeline(layout *PipelineLayout) *Pipeline {
-	p := &Pipeline{layout: layout, Name: "Pipeline"}
+	p := &Pipeline{layout: layout, Name: "Pipeline", PrintData: true}
 	return p
 }
 
