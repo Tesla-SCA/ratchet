@@ -75,13 +75,22 @@ func buildPostgreSQLInsertSQL(objects []map[string]interface{}, tableName string
 			insertSQL += ", "
 		}
 
+		objectVals := objects[i]
+
 		for j := 0; j < len(cols); j++ {
 			if j > 0 {
 				row += ","
 			}
 
-			value := fmt.Sprintf("%v", objects[i][cols[j]])
-			row += value
+			var toInsert string
+			value, ok := objectVals[cols[j]]
+			if ok {
+				toInsert = fmt.Sprintf("%v", value)
+			} else {
+				toInsert = "NULL"
+			}
+
+			row += toInsert
 		}
 
 		row += ")"
