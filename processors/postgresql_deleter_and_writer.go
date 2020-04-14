@@ -8,7 +8,7 @@ import (
 	"github.com/Tesla-SCA/ratchet/util"
 )
 
-// PostgreSQLWriter handles DELETING data and then INSERTing data.JSON into a
+// PostgreSQLDeleterWriter handles DELETING data and then INSERTing data.JSON into a
 // specified SQL table. If an error occurs while deleting
 // or executing the INSERT, the error will be sent to the killChan.
 //
@@ -18,7 +18,7 @@ import (
 // of valid objects, where the keys are column names and the
 // the values are the SQL values to be inserted into those columns.
 //
-// For use-cases where a PostgreSQLWriter instance needs to write to
+// For use-cases where a PostgreSQLDeleterWriter instance needs to write to
 // multiple tables you can pass in SQLWriterData.
 //
 // Note that if `OnDupKeyUpdate` is true (the default), you *must*
