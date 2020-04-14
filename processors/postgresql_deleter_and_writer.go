@@ -36,7 +36,7 @@ type PostgreSQLDeleterWriter struct {
 	timesRun		 int
 }
 
-// NewPostgreSQLWriter returns a new PostgreSQLWriter
+// NewPostgreSQLDeleterWriter returns a new PostgreSQLDeleterWriter
 func NewPostgreSQLDeleterWriter(db *sql.DB, tableName string, deleteSql string) *PostgreSQLDeleterWriter {
 	return &PostgreSQLDeleterWriter{
 		writeDB: db,
