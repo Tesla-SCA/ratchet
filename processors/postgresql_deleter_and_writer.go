@@ -72,16 +72,16 @@ func (s *PostgreSQLDeleterWriter) ProcessData(d data.JSON, outputChan chan data.
 		logger.Debug("PostgreSQLDeleterWriter: SQLWriterData scenario")
 		dd, err := data.NewJSON(wd.InsertData)
 		util.KillPipelineIfErr(err, killChan)
-		err = util.PostgreSQLInsertData(s.writeDB, dd, wd.TableName, s.OnDupKeyUpdate, s.OnDupKeyIndex, s.OnDupKeyFields, s.BatchSize)
+		err = util.PostgreSQLTxInsertData(tx, dd, wd.TableName, s.OnDupKeyUpdate, s.OnDupKeyIndex, s.OnDupKeyFields, s.BatchSize)
 		util.KillPipelineIfErr(err, killChan)
 	} else {
 		logger.Debug("PostgreSQLDeleterWriter: normal data scenario")
-		err = util.PostgreSQLInsertData(s.writeDB, d, s.TableName, s.OnDupKeyUpdate, s.OnDupKeyIndex, s.OnDupKeyFields, s.BatchSize)
+		err = util.PostgreSQLTxInsertData(tx, d, s.TableName, s.OnDupKeyUpdate, s.OnDupKeyIndex, s.OnDupKeyFields, s.BatchSize)
 		util.KillPipelineIfErr(err, killChan)
 	}
 	err = tx.Commit()
 	util.KillPipelineIfErr(err, killChan)
-	
+
 	logger.Info("PostgreSQLDeleterWriter: Write complete")
 }
 
