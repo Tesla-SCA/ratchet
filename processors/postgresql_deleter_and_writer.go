@@ -59,7 +59,7 @@ func (s *PostgreSQLDeleterWriter) ProcessData(d data.JSON, outputChan chan data.
 	util.KillPipelineIfErr(err, killChan)
 
 	if s.timesRun == 0 {
-		_, err := s.writeDB.Exec(s.deleteSql)
+		_, err := tx.Exec(s.deleteSql)
 		util.KillPipelineIfErr(err, killChan)
 	}
 	s.timesRun += 1
