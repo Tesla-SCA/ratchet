@@ -49,23 +49,12 @@ func postgresInsertObjects(db *sql.DB, objects []map[string]interface{}, tableNa
 	logger.Debug("PostgreSQLInsertData:", insertSQL)
 	logger.Debug("PostgreSQLInsertData: values", vals)
 
-	tx, err := db.Begin()
+	res, err := db.Exec(insertSQL, vals...)
 	if err != nil {
-		return err
-	}
-
-	res, err := tx.Exec(insertSQL, vals...)
-	if err != nil {
-		_ = tx.Rollback()
 		return err
 	}
 
 	rowCnt, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	err = tx.Commit()
 	if err != nil {
 		return err
 	}
