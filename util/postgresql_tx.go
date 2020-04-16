@@ -9,7 +9,7 @@ import (
 	"github.com/Tesla-SCA/ratchet/logger"
 )
 
-// PostgreSQLInsertData abstracts building and executing a SQL INSERT
+// PostgreSQLTxInsertData abstracts building and executing a SQL INSERT
 // statement for the given Data object.
 //
 // Note that the Data must be a valid JSON object
@@ -19,7 +19,7 @@ import (
 //
 // If onDupKeyUpdate is true, you must set an onDupKeyIndex. This translates
 // to the conflict_target as specified in https://www.postgresql.org/docs/9.5/static/sql-insert.html
-func PostgreSQLInsertData(db *sql.DB, d data.JSON, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string, batchSize int) error {
+func PostgreSQLTxInsertData(tx *sql.Tx, d data.JSON, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string, batchSize int) error {
 	objects, err := data.ObjectsFromJSON(d)
 	if err != nil {
 		return err
@@ -31,7 +31,7 @@ func PostgreSQLInsertData(db *sql.DB, d data.JSON, tableName string, onDupKeyUpd
 			if maxIndex > len(objects) {
 				maxIndex = len(objects)
 			}
-			err = postgresInsertObjects(db, objects[i:maxIndex], tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
+			err = postgresTxInsertObjects(tx, objects[i:maxIndex], tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
 			if err != nil {
 				return err
 			}
@@ -39,17 +39,17 @@ func PostgreSQLInsertData(db *sql.DB, d data.JSON, tableName string, onDupKeyUpd
 		return nil
 	}
 
-	return postgresInsertObjects(db, objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
+	return postgresTxInsertObjects(tx, objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
 }
 
-func postgresInsertObjects(db *sql.DB, objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string) error {
+func postgresTxInsertObjects(tx *sql.Tx, objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string) error {
 	logger.Info("PostgreSQLInsertData: building INSERT for len(objects) =", len(objects))
-	insertSQL, vals := buildPostgreSQLInsertSQL(objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
+	insertSQL, vals := buildPostgreSQLTxInsertSQL(objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
 
 	logger.Debug("PostgreSQLInsertData:", insertSQL)
 	logger.Debug("PostgreSQLInsertData: values", vals)
 
-	res, err := db.Exec(insertSQL, vals...)
+	res, err := tx.Exec(insertSQL, vals...)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func postgresInsertObjects(db *sql.DB, objects []map[string]interface{}, tableNa
 	return nil
 }
 
-func buildPostgreSQLInsertSQL(objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string) (insertSQL string, vals []interface{}) {
+func buildPostgreSQLTxInsertSQL(objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string) (insertSQL string, vals []interface{}) {
 	cols := sortedColumns(objects)
 
 	// Format: INSERT INTO tablename(col1,col2) VALUES(?,?),(?,?)
