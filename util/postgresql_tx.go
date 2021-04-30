@@ -3,6 +3,7 @@ package util
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/Tesla-SCA/ratchet/data"
@@ -46,9 +47,10 @@ func postgresTxInsertObjects(tx *sql.Tx, objects []map[string]interface{}, table
 	logger.Info("PostgreSQLInsertData: building INSERT for len(objects) =", len(objects))
 	insertSQL, vals := buildPostgreSQLTxInsertSQL(objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
 
-	logger.Debug("PostgreSQLInsertData:", insertSQL)
-	logger.Debug("PostgreSQLInsertData: values", vals)
-
+	// logger.Debug("PostgreSQLInsertData:", insertSQL)
+	// logger.Debug("PostgreSQLInsertData: values", vals)
+	fmt.Fprintln(os.Stdout, "PostgreSQLInsertData:", insertSQL)	
+	fmt.Fprintln(os.Stdout, "PostgreSQLInsertData: values", vals)
 	res, err := tx.Exec(insertSQL, vals...)
 	if err != nil {
 		return err
