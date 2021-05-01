@@ -46,11 +46,9 @@ func postgresTxInsertObjects(tx *sql.Tx, objects []map[string]interface{}, table
 	logger.Info("PostgreSQLInsertData: building INSERT for len(objects) =", len(objects))
 	insertSQL, vals := buildPostgreSQLTxInsertSQL(objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
 
-	// Commenting these out to see if they're contributing to the memory issue
-	//logger.Debug("PostgreSQLInsertData:", insertSQL)
-	//logger.Debug("PostgreSQLInsertData: values", vals)
-	fmt.Println( "PostgreSQLInsertData:", insertSQL)	
-	fmt.Println( "PostgreSQLInsertData: values", vals)
+	logger.Debug("PostgreSQLInsertData:", insertSQL)
+	logger.Debug("PostgreSQLInsertData: values", vals)
+
 	res, err := tx.Exec(insertSQL, vals...)
 	if err != nil {
 		return err
