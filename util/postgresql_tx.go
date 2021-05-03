@@ -49,8 +49,8 @@ func postgresTxInsertObjects(tx *sql.Tx, objects []map[string]interface{}, table
 
 	// logger.Debug("PostgreSQLInsertData:", insertSQL)
 	// logger.Debug("PostgreSQLInsertData: values", vals)
-	fmt.Fprintln(os.Stdout, "PostgreSQLInsertData:", insertSQL)	
-	fmt.Fprintln(os.Stdout, "PostgreSQLInsertData: values", vals)
+	fmt.Fprintln(os.Stdout, "PostgreSQLInsertData:", len(insertSQL))	
+	fmt.Fprintln(os.Stdout, "PostgreSQLInsertData: values",len(vals))
 	res, err := tx.Exec(insertSQL, vals...)
 	if err != nil {
 		return err
