@@ -3,7 +3,7 @@ package util
 import (
 	"database/sql"
 	"fmt"
-	"os"
+	"runtime"
 	"strings"
 
 	"github.com/Tesla-SCA/ratchet/data"
@@ -21,11 +21,12 @@ import (
 // If onDupKeyUpdate is true, you must set an onDupKeyIndex. This translates
 // to the conflict_target as specified in https://www.postgresql.org/docs/9.5/static/sql-insert.html
 func PostgreSQLTxInsertData(tx *sql.Tx, d data.JSON, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string, batchSize int) error {
+	fmt.Println("PostgreSQLTxInsertData: Before Exec")
+	PrintMemUsage()
 	objects, err := data.ObjectsFromJSON(d)
 	if err != nil {
 		return err
 	}
-
 	if batchSize > 0 {
 		for i := 0; i < len(objects); i += batchSize {
 			maxIndex := i + batchSize
@@ -37,9 +38,12 @@ func PostgreSQLTxInsertData(tx *sql.Tx, d data.JSON, tableName string, onDupKeyU
 				return err
 			}
 		}
+		fmt.Println("PostgreSQLTxInsertData: Down Exec")
+		PrintMemUsage()
 		return nil
+		
 	}
-
+	PrintMemUsage()
 	return postgresTxInsertObjects(tx, objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
 }
 
@@ -47,10 +51,10 @@ func postgresTxInsertObjects(tx *sql.Tx, objects []map[string]interface{}, table
 	logger.Info("PostgreSQLInsertData: building INSERT for len(objects) =", len(objects))
 	insertSQL, vals := buildPostgreSQLTxInsertSQL(objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
 
-	// logger.Debug("PostgreSQLInsertData:", insertSQL)
-	// logger.Debug("PostgreSQLInsertData: values", vals)
-	fmt.Fprintln(os.Stdout, "PostgreSQLInsertData:", len(insertSQL))	
-	fmt.Fprintln(os.Stdout, "PostgreSQLInsertData: values",len(vals))
+	// fmt.Fprintln(os.Stdout, "PostgreSQLInsertData:", len(insertSQL))	
+	// fmt.Fprintln(os.Stdout, "PostgreSQLInsertData: values",len(vals))
+	fmt.Println("postgresTxInsertObjects: Before tx.Exec")
+	PrintMemUsage()
 	res, err := tx.Exec(insertSQL, vals...)
 	if err != nil {
 		return err
@@ -60,7 +64,8 @@ func postgresTxInsertObjects(tx *sql.Tx, objects []map[string]interface{}, table
 	if err != nil {
 		return err
 	}
-
+	fmt.Println("postgresTxInsertObjects: After tx.Exec")
+	PrintMemUsage()
 	logger.Info(fmt.Sprintf("PostgreSQLInsertData: rows affected = %d", rowCnt))
 	return nil
 }
@@ -121,3 +126,22 @@ func buildPostgreSQLTxInsertSQL(objects []map[string]interface{}, tableName stri
 
 	return
 }
+
+// PrintMemUsage outputs the current, total and OS memory being used. As well as the number
+// of garage collection cycles completed.
+func bToMb(b uint64) uint64 {
+	return b / 1024 / 1024
+}
+
+func PrintMemUsage() {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	// For info on each, see: https://golang.org/pkg/runtime/#MemStats
+	fmt.Printf("Alloc = %v MiB", bToMb(m.Alloc))
+	fmt.Printf("\tTotalAlloc = %v MiB", bToMb(m.TotalAlloc))
+	fmt.Printf("\tSys = %v MiB", bToMb(m.Sys))
+	fmt.Printf("\tNumGC = %v\n", m.NumGC)
+	
+}
+
+
