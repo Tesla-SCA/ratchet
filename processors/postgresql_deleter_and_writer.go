@@ -80,6 +80,7 @@ func (s *PostgreSQLDeleterWriter) ProcessData(d data.JSON, outputChan chan data.
 	} else {
 		logger.Debug("PostgreSQLDeleterWriter: normal data scenario")
 		fmt.Println("PostgreSQLDeleterWriter: normal data scenario")
+		fmt.Printf("DEBUG: len(d) = %d bytes\n", len(d))
 		err = util.PostgreSQLTxInsertData(tx, d, s.TableName, s.OnDupKeyUpdate, s.OnDupKeyIndex, s.OnDupKeyFields, s.BatchSize)
 		util.KillPipelineIfErr(err, killChan)
 	}
