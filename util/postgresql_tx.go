@@ -43,7 +43,6 @@ func PostgreSQLTxInsertData(tx *sql.Tx, d data.JSON, tableName string, onDupKeyU
 		return nil
 		
 	}
-	PrintMemUsage()
 	return postgresTxInsertObjects(tx, objects, tableName, onDupKeyUpdate, onDupKeyIndex, onDupKeyFields)
 }
 
@@ -67,6 +66,11 @@ func postgresTxInsertObjects(tx *sql.Tx, objects []map[string]interface{}, table
 	fmt.Println("postgresTxInsertObjects: After tx.Exec")
 	PrintMemUsage()
 	logger.Info(fmt.Sprintf("PostgreSQLInsertData: rows affected = %d", rowCnt))
+	fmt.Println("Before:GC")
+	PrintMemUsage()
+	runtime.GC()
+	fmt.Println("After:GC")
+    PrintMemUsage()
 	return nil
 }
 
@@ -138,7 +142,6 @@ func PrintMemUsage() {
 	runtime.ReadMemStats(&m)
 	// For info on each, see: https://golang.org/pkg/runtime/#MemStats
 	fmt.Printf("Alloc = %v MiB", bToMb(m.Alloc))
-	fmt.Printf("\tTotalAlloc = %v MiB", bToMb(m.TotalAlloc))
 	fmt.Printf("\tSys = %v MiB", bToMb(m.Sys))
 	fmt.Printf("\tNumGC = %v\n", m.NumGC)
 	
