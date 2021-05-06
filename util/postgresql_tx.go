@@ -66,15 +66,13 @@ func postgresTxInsertObjects(tx *sql.Tx, objects []map[string]interface{}, table
 	fmt.Println("postgresTxInsertObjects: After tx.Exec")
 	PrintMemUsage()
 	logger.Info(fmt.Sprintf("PostgreSQLInsertData: rows affected = %d", rowCnt))
-	fmt.Println("Before:GC")
-	PrintMemUsage()
-	runtime.GC()
-	fmt.Println("After:GC")
     PrintMemUsage()
 	return nil
 }
 
 func buildPostgreSQLTxInsertSQL(objects []map[string]interface{}, tableName string, onDupKeyUpdate bool, onDupKeyIndex string, onDupKeyFields []string) (insertSQL string, vals []interface{}) {
+	fmt.Println("buildPostgreSQLTxInsertSQL: 1. Before insertSQL")
+	PrintMemUsage()
 	cols := sortedColumns(objects)
 
 	// Format: INSERT INTO tablename(col1,col2) VALUES(?,?),(?,?)
@@ -99,7 +97,8 @@ func buildPostgreSQLTxInsertSQL(objects []map[string]interface{}, tableName stri
 		row += ")"
 		insertSQL += row
 	}
-
+	fmt.Println("buildPostgreSQLTxInsertSQL: 2")
+	PrintMemUsage()
 	if onDupKeyUpdate {
 		// format: ON CONFLICT (index) DO UPDATE SET a=EXCLUDED.a, b=EXCLUDED.b
 		insertSQL += fmt.Sprintf(" ON CONFLICT (%v) DO UPDATE SET ", onDupKeyIndex)
@@ -116,7 +115,8 @@ func buildPostgreSQLTxInsertSQL(objects []map[string]interface{}, tableName stri
 			insertSQL += fmt.Sprintf("%v=EXCLUDED.%v", c, c)
 		}
 	}
-
+	fmt.Println("buildPostgreSQLTxInsertSQL: 3")
+	PrintMemUsage()
 	vals = []interface{}{}
 	for _, obj := range objects {
 		for _, col := range cols {
@@ -127,7 +127,8 @@ func buildPostgreSQLTxInsertSQL(objects []map[string]interface{}, tableName stri
 			}
 		}
 	}
-
+	fmt.Println("buildPostgreSQLTxInsertSQL: 4")
+	PrintMemUsage()
 	return
 }
 
