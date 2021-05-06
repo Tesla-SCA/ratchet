@@ -2,6 +2,7 @@ package processors
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/Tesla-SCA/ratchet/data"
 	"github.com/Tesla-SCA/ratchet/logger"
@@ -70,12 +71,15 @@ func (s *PostgreSQLDeleterWriter) ProcessData(d data.JSON, outputChan chan data.
 	logger.Info("PostgreSQLDeleterWriter: Writing data...")
 	if err == nil && wd.TableName != "" && wd.InsertData != nil {
 		logger.Debug("PostgreSQLDeleterWriter: SQLWriterData scenario")
+		fmt.Println("PostgreSQLDeleterWriter: SQLWriterData scenario")
 		dd, err := data.NewJSON(wd.InsertData)
+		fmt.Printf("DEBUG: len(dd) = %d bytes", len(dd))
 		util.KillPipelineIfErr(err, killChan)
 		err = util.PostgreSQLTxInsertData(tx, dd, wd.TableName, s.OnDupKeyUpdate, s.OnDupKeyIndex, s.OnDupKeyFields, s.BatchSize)
 		util.KillPipelineIfErr(err, killChan)
 	} else {
 		logger.Debug("PostgreSQLDeleterWriter: normal data scenario")
+		fmt.Println("PostgreSQLDeleterWriter: normal data scenario")
 		err = util.PostgreSQLTxInsertData(tx, d, s.TableName, s.OnDupKeyUpdate, s.OnDupKeyIndex, s.OnDupKeyFields, s.BatchSize)
 		util.KillPipelineIfErr(err, killChan)
 	}
